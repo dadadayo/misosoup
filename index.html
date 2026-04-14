@@ -1,0 +1,748 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>みそ汁の具メーカー</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --accent: #0f172a;
+      --accent-2: #334155;
+      --soft: #f1f5f9;
+      --chip: #eef2f7;
+      --shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif; }
+    body { min-height: 100vh; }
+
+    .wrap {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 20px 16px 32px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(226,232,240,0.9);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .card-head {
+      padding: 22px 22px 12px;
+    }
+
+    .card-body {
+      padding: 0 22px 22px;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin: 0 0 8px;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .section {
+      margin-top: 22px;
+    }
+
+    .label {
+      display: block;
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .input, .select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      padding: 14px 14px;
+      font-size: 16px;
+      color: var(--text);
+      outline: none;
+    }
+
+    .input:focus, .select:focus {
+      border-color: #94a3b8;
+      box-shadow: 0 0 0 4px rgba(148,163,184,0.12);
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+      margin-top: 8px;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+      min-height: 24px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: var(--chip);
+      color: var(--accent-2);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .count-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .count-btn {
+      appearance: none;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      border-radius: 14px;
+      padding: 12px 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.18s ease;
+    }
+
+    .count-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .option-box {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 18px;
+      padding: 14px 14px;
+    }
+
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      line-height: 1.5;
+      padding: 8px 0;
+    }
+
+    .option input[type="checkbox"] {
+      margin-top: 2px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      flex: 0 0 auto;
+    }
+
+    .primary-btn {
+      width: 100%;
+      border: 0;
+      border-radius: 18px;
+      background: var(--accent);
+      color: #fff;
+      padding: 15px 16px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      margin-top: 22px;
+      transition: transform 0.08s ease, opacity 0.18s ease;
+    }
+
+    .primary-btn:active { transform: translateY(1px); }
+    .primary-btn:hover { opacity: 0.95; }
+
+    .result-empty {
+      border: 1px dashed #cbd5e1;
+      border-radius: 20px;
+      padding: 30px 18px;
+      text-align: center;
+      color: var(--muted);
+      background: rgba(255,255,255,0.75);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .ingredient-card {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 16px;
+      background: #fff;
+    }
+
+    .ingredient-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .ingredient-name {
+      font-size: 18px;
+      font-weight: 800;
+      line-height: 1.3;
+    }
+
+    .badge {
+      flex: 0 0 auto;
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--accent-2);
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .tag {
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: var(--chip);
+      color: var(--accent-2);
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .pairing {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+
+    .summary {
+      margin-top: 16px;
+      border-radius: 20px;
+      background: var(--soft);
+      padding: 18px;
+    }
+
+    .summary-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .summary p {
+      margin: 0 0 8px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: #334155;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .info-box {
+      background: #fff;
+      border-radius: 20px;
+      padding: 16px;
+      border: 1px solid var(--line);
+    }
+
+    .info-box h3 {
+      margin: 0 0 8px;
+      font-size: 15px;
+    }
+
+    .info-box p {
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    .notice {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 920px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+      .wrap {
+        max-width: 760px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .wrap {
+        padding: 12px 12px 24px;
+      }
+      .card-head {
+        padding: 18px 16px 8px;
+      }
+      .card-body {
+        padding: 0 16px 16px;
+      }
+      .title {
+        font-size: 24px;
+      }
+      .result-grid {
+        grid-template-columns: 1fr;
+      }
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+      .ingredient-top {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .count-grid {
+        gap: 8px;
+      }
+      .count-btn {
+        padding: 12px 8px;
+      }
+      .primary-btn {
+        position: sticky;
+        bottom: 10px;
+        z-index: 5;
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.14);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="grid">
+      <section class="card">
+        <div class="card-head">
+          <h1 class="title">みそ汁の具メーカー</h1>
+          <p class="subtitle">ランダムに選びつつ、栄養と具の偏りをある程度考慮して提案します。スマホでもそのまま使えます。</p>
+        </div>
+        <div class="card-body">
+          <div class="section">
+            <label class="label" for="wanted">入れたい食材</label>
+            <input id="wanted" class="input" type="text" placeholder="例: 豆腐、わかめ、大根" />
+            <div class="hint">入力した食材を優先しつつ、合いやすい食材を足します。</div>
+            <div id="matchedChips" class="chips">
+              <span class="hint">一致した食材がここに表示されます</span>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="label">具の数</div>
+            <div class="count-grid">
+              <button class="count-btn" data-count="2">2品</button>
+              <button class="count-btn active" data-count="3">3品</button>
+              <button class="count-btn" data-count="4">4品</button>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="label">追加条件</div>
+            <div class="option-box">
+              <label class="option">
+                <input id="excludeStrong" type="checkbox" />
+                <span>香りやクセが強めの具を外す</span>
+              </label>
+              <label class="option">
+                <input id="excludeShellfish" type="checkbox" />
+                <span>貝類を外す</span>
+              </label>
+              <label class="option">
+                <input id="includeAdventurous" type="checkbox" />
+                <span>変わり種・クセ強めの具も候補に入れる</span>
+              </label>
+            </div>
+            <div class="notice">変わり種モードでは、ミョウガ・大葉・トマト・ピーマン・納豆・湯葉・はまぐり・アスパラガスが出やすくなります。香りやクセ強め除外とは同時に選べません。</div>
+          </div>
+
+          <button id="generateBtn" class="primary-btn">候補を提案する</button>
+        </div>
+      </section>
+
+      <div>
+        <section class="card">
+          <div class="card-head">
+            <h2 class="title" style="font-size:24px; margin-bottom:0;">提案結果</h2>
+          </div>
+          <div class="card-body">
+            <div id="resultEmpty" class="result-empty">条件を選んで「候補を提案する」を押すと、具の組み合わせを表示します。</div>
+            <div id="resultArea" style="display:none;">
+              <div id="resultGrid" class="result-grid"></div>
+              <div id="summaryBox" class="summary"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card" style="margin-top:20px;">
+          <div class="card-head">
+            <h2 class="title" style="font-size:24px; margin-bottom:0;">このアプリの選び方</h2>
+          </div>
+          <div class="card-body">
+            <div class="info-grid">
+              <div class="info-box">
+                <h3>偏りを抑える</h3>
+                <p>葉物だけ、きのこだけ、海藻だけになりにくいように同カテゴリの重複を抑えています。栄養面も最低限崩れにくいようにしています。</p>
+              </div>
+              <div class="info-box">
+                <h3>相性を加点</h3>
+                <p>豆腐×わかめ、油揚げ×大根のような定番ペアを優先しやすくしています。</p>
+              </div>
+              <div class="info-box">
+                <h3>入力具材を優先</h3>
+                <p>入れたい食材があれば、それを軸に不足しがちなカテゴリを補うように選びます。</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const INGREDIENTS = [
+      { id: "tofu", name: "豆腐", category: "protein", tags: ["定番", "やさしい", "たんぱく質"], weights: { nutrition: 4, balance: 5, cheap: 4, easy: 5 }, pairings: ["wakame", "negi", "aburaage", "nameko", "komatsuna"] },
+      { id: "aburaage", name: "油揚げ", category: "protein", tags: ["コク", "定番"], weights: { nutrition: 3, balance: 4, cheap: 4, easy: 4 }, pairings: ["daikon", "negi", "hakusai", "komatsuna", "tofu"] },
+      { id: "tamago", name: "卵", category: "protein", tags: ["満足感", "やわらかい"], weights: { nutrition: 4, balance: 3, cheap: 3, easy: 4 }, pairings: ["tamanegi", "komatsuna", "tofu", "enoki"] },
+      { id: "atsuage", name: "厚揚げ", category: "protein", tags: ["食べ応え", "大豆"], weights: { nutrition: 4, balance: 4, cheap: 3, easy: 3 }, pairings: ["daikon", "gobo", "negi", "hakusai"] },
+      { id: "koyadofu", name: "高野豆腐", category: "protein", tags: ["保存しやすい", "大豆"], weights: { nutrition: 4, balance: 4, cheap: 3, easy: 3 }, pairings: ["ninjin", "daikon", "hoshi-shiitake", "negi"] },
+      { id: "yuba", name: "湯葉", category: "protein", tags: ["上品", "大豆"], weights: { nutrition: 3, balance: 4, cheap: 2, easy: 2 }, pairings: ["mitsuba", "shiitake", "tofu", "nagaimo"] },
+      { id: "natto", name: "納豆", category: "protein", tags: ["好み分かれる", "発酵"], weights: { nutrition: 5, balance: 2, cheap: 4, easy: 4 }, pairings: ["negi", "nameko", "tofu"] },
+      { id: "wakame", name: "わかめ", category: "seaweed", tags: ["定番", "海藻"], weights: { nutrition: 4, balance: 5, cheap: 4, easy: 5 }, pairings: ["tofu", "negi", "tamanegi"] },
+      { id: "tororo-kombu", name: "とろろ昆布", category: "seaweed", tags: ["香り", "海藻"], weights: { nutrition: 3, balance: 4, cheap: 3, easy: 5 }, pairings: ["tofu", "daikon", "negi"] },
+      { id: "aosa", name: "あおさ", category: "seaweed", tags: ["香り", "海藻"], weights: { nutrition: 3, balance: 4, cheap: 3, easy: 5 }, pairings: ["tofu", "tamago", "tamanegi"] },
+      { id: "komatsuna", name: "小松菜", category: "leafy", tags: ["葉物", "緑黄色野菜"], weights: { nutrition: 5, balance: 4, cheap: 3, easy: 3 }, pairings: ["tofu", "aburaage", "tamago"] },
+      { id: "hourensou", name: "ほうれん草", category: "leafy", tags: ["葉物", "緑黄色野菜"], weights: { nutrition: 5, balance: 4, cheap: 3, easy: 3 }, pairings: ["tofu", "tamago", "enoki"] },
+      { id: "mizuna", name: "水菜", category: "leafy", tags: ["葉物", "さっぱり"], weights: { nutrition: 3, balance: 4, cheap: 3, easy: 4 }, pairings: ["aburaage", "tofu", "shiitake"] },
+      { id: "chingensai", name: "チンゲン菜", category: "leafy", tags: ["葉物", "食感"], weights: { nutrition: 4, balance: 4, cheap: 3, easy: 3 }, pairings: ["tamago", "tofu", "tamanegi"] },
+      { id: "hakusai", name: "白菜", category: "leafy", tags: ["やさしい", "かさ増し"], weights: { nutrition: 3, balance: 4, cheap: 4, easy: 4 }, pairings: ["aburaage", "atsuage", "shiitake"] },
+      { id: "cabbage", name: "キャベツ", category: "leafy", tags: ["甘み", "やさしい"], weights: { nutrition: 3, balance: 4, cheap: 4, easy: 4 }, pairings: ["aburaage", "tamanegi", "tamago"] },
+      { id: "daikon", name: "大根", category: "root", tags: ["定番", "さっぱり"], weights: { nutrition: 3, balance: 5, cheap: 4, easy: 4 }, pairings: ["aburaage", "atsuage", "tororo-kombu"] },
+      { id: "ninjin", name: "にんじん", category: "root", tags: ["彩り", "根菜"], weights: { nutrition: 4, balance: 4, cheap: 4, easy: 3 }, pairings: ["gobo", "koyadofu", "daikon"] },
+      { id: "gobo", name: "ごぼう", category: "root", tags: ["香り", "根菜"], weights: { nutrition: 4, balance: 4, cheap: 3, easy: 2 }, pairings: ["ninjin", "atsuage", "daikon"] },
+      { id: "renkon", name: "れんこん", category: "root", tags: ["食感", "根菜"], weights: { nutrition: 3, balance: 4, cheap: 2, easy: 2 }, pairings: ["ninjin", "aburaage", "negi"] },
+      { id: "satoimo", name: "里芋", category: "starch", tags: ["ほっこり", "芋"], weights: { nutrition: 3, balance: 4, cheap: 3, easy: 2 }, pairings: ["negi", "shiitake", "aburaage"] },
+      { id: "jagaimo", name: "じゃがいも", category: "starch", tags: ["満足感", "芋"], weights: { nutrition: 2, balance: 3, cheap: 5, easy: 4 }, pairings: ["wakame", "tamanegi", "aburaage"] },
+      { id: "satsumaimo", name: "さつまいも", category: "starch", tags: ["甘み", "芋"], weights: { nutrition: 3, balance: 3, cheap: 3, easy: 3 }, pairings: ["tamanegi", "aburaage", "hakusai"] },
+      { id: "nagaimo", name: "長芋", category: "starch", tags: ["とろみ", "芋"], weights: { nutrition: 3, balance: 3, cheap: 2, easy: 3 }, pairings: ["yuba", "shiitake", "negi"] },
+      { id: "kabocha", name: "かぼちゃ", category: "starch", tags: ["甘み", "満足感"], weights: { nutrition: 4, balance: 3, cheap: 3, easy: 3 }, pairings: ["tamanegi", "aburaage", "komatsuna"] },
+      { id: "tamanegi", name: "玉ねぎ", category: "aromatic", tags: ["甘み", "定番"], weights: { nutrition: 3, balance: 5, cheap: 5, easy: 5 }, pairings: ["jagaimo", "wakame", "tamago", "aosa"] },
+      { id: "negi", name: "長ねぎ / 小ねぎ", category: "aromatic", tags: ["香り", "定番"], weights: { nutrition: 2, balance: 5, cheap: 4, easy: 5 }, pairings: ["tofu", "wakame", "daikon", "aburaage"] },
+      { id: "nasu", name: "なす", category: "vegetable", tags: ["やわらかい", "定番"], weights: { nutrition: 2, balance: 4, cheap: 3, easy: 3 }, pairings: ["aburaage", "myoga", "tofu"] },
+      { id: "moyashi", name: "もやし", category: "vegetable", tags: ["安い", "かさ増し"], weights: { nutrition: 2, balance: 3, cheap: 5, easy: 5 }, pairings: ["wakame", "tofu", "tamago"] },
+      { id: "broccoli", name: "ブロッコリー", category: "vegetable", tags: ["栄養", "食べ応え"], weights: { nutrition: 5, balance: 3, cheap: 2, easy: 3 }, pairings: ["tamanegi", "tofu", "tamago"] },
+      { id: "cauliflower", name: "カリフラワー", category: "vegetable", tags: ["やさしい", "食感"], weights: { nutrition: 3, balance: 3, cheap: 2, easy: 3 }, pairings: ["tamanegi", "hakusai", "tofu"] },
+      { id: "asparagus", name: "アスパラガス", category: "vegetable", tags: ["食感", "彩り"], weights: { nutrition: 4, balance: 3, cheap: 2, easy: 3 }, pairings: ["tamago", "tofu", "tamanegi"] },
+      { id: "piman", name: "ピーマン", category: "vegetable", tags: ["香り", "個性"], weights: { nutrition: 3, balance: 2, cheap: 3, easy: 3 }, pairings: ["tamanegi", "tofu"] },
+      { id: "okura", name: "オクラ", category: "vegetable", tags: ["ねばり", "栄養"], weights: { nutrition: 4, balance: 3, cheap: 2, easy: 4 }, pairings: ["tofu", "nameko", "aosa"] },
+      { id: "myoga", name: "ミョウガ", category: "vegetable", tags: ["香り", "アクセント"], weights: { nutrition: 2, balance: 2, cheap: 2, easy: 4 }, pairings: ["nasu", "tofu", "tororo-kombu"] },
+      { id: "ooba", name: "大葉", category: "vegetable", tags: ["香り", "アクセント"], weights: { nutrition: 2, balance: 2, cheap: 2, easy: 4 }, pairings: ["tofu", "yuba", "nasu"] },
+      { id: "tomato", name: "トマト", category: "vegetable", tags: ["酸味", "変化球寄り"], weights: { nutrition: 4, balance: 2, cheap: 2, easy: 4 }, pairings: ["tamanegi", "tamago"] },
+      { id: "nameko", name: "なめこ", category: "mushroom", tags: ["定番", "とろみ"], weights: { nutrition: 3, balance: 5, cheap: 3, easy: 5 }, pairings: ["tofu", "negi", "okura"] },
+      { id: "shimeji", name: "しめじ", category: "mushroom", tags: ["定番", "きのこ"], weights: { nutrition: 3, balance: 4, cheap: 3, easy: 4 }, pairings: ["hakusai", "tofu", "negi"] },
+      { id: "enoki", name: "えのき", category: "mushroom", tags: ["やさしい", "きのこ"], weights: { nutrition: 3, balance: 4, cheap: 3, easy: 4 }, pairings: ["tamago", "tofu", "hourensou"] },
+      { id: "shiitake", name: "しいたけ", category: "mushroom", tags: ["旨み", "きのこ"], weights: { nutrition: 3, balance: 4, cheap: 2, easy: 3 }, pairings: ["hakusai", "satoimo", "yuba"] },
+      { id: "maitake", name: "まいたけ", category: "mushroom", tags: ["香り", "きのこ"], weights: { nutrition: 4, balance: 4, cheap: 2, easy: 3 }, pairings: ["aburaage", "komatsuna", "daikon"] },
+      { id: "eringi", name: "エリンギ", category: "mushroom", tags: ["食感", "きのこ"], weights: { nutrition: 3, balance: 3, cheap: 2, easy: 3 }, pairings: ["tofu", "hakusai", "negi"] },
+      { id: "asari", name: "あさり", category: "shellfish", tags: ["旨み", "貝"], weights: { nutrition: 4, balance: 4, cheap: 2, easy: 2 }, pairings: ["wakame", "negi", "tofu"] },
+      { id: "shijimi", name: "しじみ", category: "shellfish", tags: ["旨み", "貝"], weights: { nutrition: 4, balance: 4, cheap: 2, easy: 2 }, pairings: ["wakame", "negi", "tofu"] },
+      { id: "hamaguri", name: "はまぐり", category: "shellfish", tags: ["旨み", "貝"], weights: { nutrition: 4, balance: 4, cheap: 1, easy: 2 }, pairings: ["negi", "wakame", "mitsuba"] }
+    ];
+
+    const CATEGORY_LABEL = {
+      protein: "たんぱく系",
+      seaweed: "海藻",
+      leafy: "葉物",
+      root: "根菜",
+      starch: "いも・かさ増し",
+      aromatic: "香り・定番",
+      vegetable: "野菜",
+      mushroom: "きのこ",
+      shellfish: "貝類"
+    };
+
+    const ADVENTUROUS_IDS = ["myoga", "ooba", "tomato", "piman", "natto", "hamaguri", "yuba", "asparagus"];
+
+    const categoryCaps = {
+      leafy: 1,
+      seaweed: 1,
+      mushroom: 1,
+      shellfish: 1,
+      protein: 1,
+      starch: 1
+    };
+
+    let ingredientCount = 3;
+
+    const wantedInput = document.getElementById("wanted");
+    const matchedChips = document.getElementById("matchedChips");
+    const excludeStrong = document.getElementById("excludeStrong");
+    const excludeShellfish = document.getElementById("excludeShellfish");
+    const includeAdventurous = document.getElementById("includeAdventurous");
+    const generateBtn = document.getElementById("generateBtn");
+    const resultEmpty = document.getElementById("resultEmpty");
+    const resultArea = document.getElementById("resultArea");
+    const resultGrid = document.getElementById("resultGrid");
+    const summaryBox = document.getElementById("summaryBox");
+
+    function normalizeText(text) {
+      return text.trim().toLowerCase().replace(/[\s　]+/g, "");
+    }
+
+    function uniqueById(list) {
+      return Array.from(new Map(list.map((item) => [item.id, item])).values());
+    }
+
+    function getWantedIds() {
+      const tokens = wantedInput.value
+        .split(/[、,，\n]/)
+        .map((t) => normalizeText(t))
+        .filter(Boolean);
+
+      return uniqueById(
+        INGREDIENTS.filter((item) => tokens.some((token) => normalizeText(item.name).includes(token)))
+      ).map((i) => i.id);
+    }
+
+    function renderMatchedChips() {
+      const wantedIds = getWantedIds();
+      const items = INGREDIENTS.filter((i) => wantedIds.includes(i.id));
+      if (!items.length) {
+        matchedChips.innerHTML = '<span class="hint">一致した食材がここに表示されます</span>';
+        return;
+      }
+      matchedChips.innerHTML = items.map((item) => `<span class="chip">${escapeHtml(item.name)}</span>`).join("");
+    }
+
+    function scoreIngredient(item, wantedIds, chosen, adventurousOn) {
+      const baseScore = item.weights.balance * 8 + item.weights.nutrition * 6;
+      let score = baseScore;
+
+      if (wantedIds.includes(item.id)) score += 100;
+
+      const chosenIds = chosen.map((c) => c.id);
+      const sharedPairing = chosen.some((c) => c.pairings.includes(item.id) || item.pairings.includes(c.id));
+      if (sharedPairing) score += 18;
+
+      const sameCategoryCount = chosen.filter((c) => c.category === item.category).length;
+      if (sameCategoryCount > 0) score -= 24 * sameCategoryCount;
+
+      const cap = categoryCaps[item.category];
+      if (cap && sameCategoryCount >= cap) score -= 1000;
+
+      if (chosenIds.length === 0) {
+        if (["protein", "root", "aromatic", "mushroom", "seaweed"].includes(item.category)) score += 8;
+      }
+
+      if (chosenIds.length === 1) {
+        const first = chosen[0]?.category;
+        if (first === "protein" && ["seaweed", "leafy", "mushroom", "aromatic", "root"].includes(item.category)) score += 10;
+        if (first === "seaweed" && ["protein", "aromatic", "root"].includes(item.category)) score += 10;
+        if (first === "leafy" && ["protein", "mushroom", "aromatic"].includes(item.category)) score += 10;
+      }
+
+      if (chosenIds.length === 2) {
+        const categories = chosen.map((c) => c.category);
+        const hasProtein = categories.includes("protein");
+        const hasSeaweed = categories.includes("seaweed");
+        const hasLeafy = categories.includes("leafy");
+        const hasMushroom = categories.includes("mushroom");
+
+        if (hasProtein && !hasSeaweed && item.category === "seaweed") score += 16;
+        if (hasProtein && !hasLeafy && item.category === "leafy") score += 14;
+        if (!hasMushroom && item.category === "mushroom") score += 10;
+        if (hasSeaweed && !hasProtein && item.category === "protein") score += 16;
+      }
+
+      if (ADVENTUROUS_IDS.includes(item.id)) {
+        score += adventurousOn ? 18 : -6;
+      }
+
+      return score + Math.random() * 6;
+    }
+
+    function pickIngredients({ wantedIds, ingredientCount, excludedIds, adventurousOn }) {
+      const all = INGREDIENTS.filter((i) => !excludedIds.includes(i.id));
+      const wanted = uniqueById(all.filter((i) => wantedIds.includes(i.id)));
+      const chosen = [...wanted].slice(0, ingredientCount);
+
+      const safePool = all.filter((i) => !chosen.some((c) => c.id === i.id));
+
+      while (chosen.length < ingredientCount) {
+        const scored = safePool
+          .filter((i) => !chosen.some((c) => c.id === i.id))
+          .map((item) => ({ item, score: scoreIngredient(item, wantedIds, chosen, adventurousOn) }))
+          .sort((a, b) => b.score - a.score);
+
+        if (!scored.length) break;
+
+        const top = scored.slice(0, Math.min(5, scored.length));
+        const selected = top[Math.floor(Math.random() * top.length)].item;
+        chosen.push(selected);
+      }
+
+      return chosen.slice(0, ingredientCount);
+    }
+
+    function buildComment(result) {
+      const categories = result.map((r) => CATEGORY_LABEL[r.category]);
+      const names = result.map((r) => r.name);
+      const hasProtein = result.some((r) => r.category === "protein");
+      const hasSeaweed = result.some((r) => r.category === "seaweed");
+      const hasLeafy = result.some((r) => r.category === "leafy");
+      const hasMushroom = result.some((r) => r.category === "mushroom");
+
+      const balance = [];
+      if (hasProtein) balance.push("たんぱく系あり");
+      if (hasSeaweed) balance.push("海藻あり");
+      if (hasLeafy) balance.push("葉物あり");
+      if (hasMushroom) balance.push("きのこあり");
+
+      return {
+        title: `今回の提案: ${names.join(" × ")}`,
+        tone: "栄養やバランスは内部で常に考慮しつつ、まとまりやすい組み合わせを優先しています。",
+        detail: `内訳は ${categories.join("・")} です。${balance.length ? `バランス面では ${balance.join("、")} になっています。` : ""}`
+      };
+    }
+
+    function renderResult(items) {
+      resultGrid.innerHTML = items.map((item) => {
+        const pairings = item.pairings
+          .map((id) => INGREDIENTS.find((i) => i.id === id)?.name)
+          .filter(Boolean)
+          .slice(0, 3)
+          .join("、");
+
+        return `
+          <article class="ingredient-card">
+            <div class="ingredient-top">
+              <div class="ingredient-name">${escapeHtml(item.name)}</div>
+              <div class="badge">${escapeHtml(CATEGORY_LABEL[item.category])}</div>
+            </div>
+            <div class="tag-row">
+              ${item.tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}
+            </div>
+            <div class="pairing">相性: ${escapeHtml(pairings)}</div>
+          </article>
+        `;
+      }).join("");
+
+      const summary = buildComment(items);
+      summaryBox.innerHTML = `
+        <div class="summary-title">${escapeHtml(summary.title)}</div>
+        <p>${escapeHtml(summary.tone)}</p>
+        <p>${escapeHtml(summary.detail)}</p>
+      `;
+
+      resultEmpty.style.display = "none";
+      resultArea.style.display = "block";
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function handleGenerate() {
+      const wantedIds = getWantedIds();
+      const excludedIds = [];
+
+      if (excludeStrong.checked) {
+        excludedIds.push("myoga", "ooba", "tomato", "piman", "natto");
+        excludedIds.push(...ADVENTUROUS_IDS.filter((id) => id !== "hamaguri"));
+      }
+
+      if (excludeShellfish.checked) {
+        excludedIds.push("asari", "shijimi", "hamaguri");
+      }
+
+      const picked = pickIngredients({
+        wantedIds,
+        ingredientCount,
+        excludedIds,
+        adventurousOn: includeAdventurous.checked
+      });
+
+      renderResult(picked);
+    }
+
+    document.querySelectorAll(".count-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".count-btn").forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        ingredientCount = Number(btn.dataset.count);
+      });
+    });
+
+    wantedInput.addEventListener("input", renderMatchedChips);
+
+    excludeStrong.addEventListener("change", () => {
+      if (excludeStrong.checked) {
+        includeAdventurous.checked = false;
+      }
+    });
+
+    includeAdventurous.addEventListener("change", () => {
+      if (includeAdventurous.checked) {
+        excludeStrong.checked = false;
+      }
+    });
+
+    generateBtn.addEventListener("click", handleGenerate);
+
+    renderMatchedChips();
+  </script>
+</body>
+</html>
